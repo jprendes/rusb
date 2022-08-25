@@ -1,6 +1,6 @@
 use std::{env, fs, path::PathBuf};
 
-static VERSION: &str = "1.0.24";
+static VERSION: &str = "1.0.26";
 
 fn link(name: &str, bundled: bool) {
     use std::env::var;
@@ -146,7 +146,12 @@ fn make_source() {
         base_config.file(libusb_source.join("libusb/os/linux_usbfs.c"));
     }
 
-    if std::env::var("CARGO_CFG_TARGET_FAMILY") == Ok("unix".into()) {
+    if std::env::var("CARGO_CFG_TARGET_OS") == Ok("emscripten".into()) {
+        base_config.define("_GNU_SOURCE", Some("1"));
+        base_config.file(libusb_source.join("libusb/os/emscripten_webusb.cpp"));
+    }
+
+    if std::env::var("CARGO_CFG_TARGET_FAMILY").unwrap_or_default().contains("unix") {
         base_config.define("HAVE_SYS_TIME_H", Some("1"));
         base_config.define("HAVE_NFDS_T", Some("1"));
         base_config.define("PLATFORM_POSIX", Some("1"));
